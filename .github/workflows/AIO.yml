@@ -600,7 +600,7 @@ jobs:
         id: create_zip
         run: |
           cd kernel_workspace
-          git clone https://github.com/cctv18/AnyKernel3 --depth=1 && rm -rf ./AnyKernel3/.git
+          git clone https://github.com/oPSDo/AK3 --depth=1 Anykernel3 && rm -rf ./AnyKernel3/.git
           cd AnyKernel3
           cp ../common/out/arch/arm64/boot/Image ./Image
           if [[ ! -f ./Image ]]; then echo "❌ Lỗi: Không tìm thấy Image Kernel"; exit 1; fi
