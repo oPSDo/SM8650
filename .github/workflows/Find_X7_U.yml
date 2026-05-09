@@ -107,7 +107,7 @@ on:
 
 jobs:
   build:
-    name: 🚀 Build ${{ inputs.kernel_ver }} | ${{ github.event.inputs.ksu_type == 'true' && ' [${{ inputs.ksu_type }}] ' || '' }} KSU:${{ inputs.ksu_type }} | SUSFS:${{ inputs.SUSFS }} | KPM:${{ inputs.kpm_enable }} | BBR:${{ inputs.bbr_enable }} | LZ4KD:${{ inputs.lz4kd }} 
+    name: 🚀 Build OKI | KSU:${{ inputs.ksu_type }} | ${{ github.event.inputs.susfs_enable }}== 'true' && ' [SuSFS] ' || '' }}${{ github.event.inputs.kpm_enable }}== 'true' && ' [KPM] ' || '' }}${{ github.event.inputs.bbr_enable }}== 'true' && ' [BBR] ' || '' }}${{ github.event.inputs.baseband_guard }}== 'true' && ' [BBG] ' || '' }}${{ github.event.inputs.ssg_enable }}== 'true' && ' [SSG] ' || '' }}${{ github.event.inputs.droidspaces_enable }}== 'true' && ' [DS+NTSync] ' || '' }}${{ github.event.inputs.better_net }}== 'true' && ' [IPv6] ' || '' }}${{ github.event.inputs.lz4_enable }}== 'true' && ' [LZ4] ' || '' }}${{ github.event.inputs.rekernel_enable }}== 'true' && ' [RE] ' || '' }} Cho 6.1.${{ inputs.kernel_ver }}
     runs-on: ubuntu-latest
     outputs:
       ksuver: ${{ steps.ksu_version.outputs.ksuver }}
