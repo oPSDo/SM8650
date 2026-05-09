@@ -719,3 +719,40 @@ jobs:
             --title "Kernel 6.1.${{ github.event.inputs.kernel_ver }} [${{ github.event.inputs.ksu_type }}] - $RELEASE_TAG" \
             --notes-file release_notes.md \
             release_zips/*
+
+  notify:
+    name: 📢 Thông báo Telegram
+    needs: [build, release]
+    if: always() # Đảm bảo job này luôn chạy kể cả khi build thất bại
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Gửi tin nhắn qua Bot Telegram
+        env:
+          TG_BOT_TK: ${{ secrets.TG_BOT_TK }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          BUILD_STATUS: ${{ needs.build.result }}
+          RELEASE_STATUS: ${{ needs.release.result }}
+        run: |
+          if [[ -z "$TG_BOT_TK" || -z "$TG_CHAT_ID" ]]; then
+            echo "⚠️ Chưa cài đặt TG_BOT_TK và TG_CHAT_ID trong Secrets. Bỏ qua gửi thông báo."
+            exit 0
+          fi
+
+          # Kiểm tra nếu cả build và release đều pass thì mới báo thành công
+          if [[ "$BUILD_STATUS" == "success" && "$RELEASE_STATUS" == "success" ]]; then
+            TITLE="✅ <b>OKI KERNEL BUILD THÀNH CÔNG</b> 🚀"
+            LINK_TEXT="📥 <a href=\"https://github.com/${{ github.repository }}/releases/latest\"><b>TẢI XUỐNG BẢN PHÁT HÀNH TẠI ĐÂY</b></a>"
+          else
+            TITLE="❌ <b>OKI KERNEL BUILD THẤT BẠI</b> ⚠️"
+            # Giấu link tải, thay bằng link dẫn thẳng vào Action log để soi lỗi
+            LINK_TEXT="🔍 <a href=\"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"><b>BẤM VÀO ĐÂY ĐỂ XEM CHI TIẾT LỖI</b></a>"
+          fi
+          
+          # Cấu hình form tin nhắn siêu đẹp (dùng %0A để xuống dòng chuẩn xác qua curl)
+          MESSAGE="${TITLE}%0A━━━━━━━━━━━━━━━━━━%0A📱 <b>Base:</b> 6.1.${{ github.event.inputs.kernel_ver }}%0A🎭 <b>KSU Branch:</b> ${{ github.event.inputs.ksu_type }}%0A🛡️ <b>SuSFS:</b> ${{ github.event.inputs.susfs_enable }} | 🔌 <b>KPM:</b> ${{ github.event.inputs.kpm_enable }}%0A━━━━━━━━━━━━━━━━━━%0A${LINK_TEXT}"
+
+          curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TK}/sendMessage" \
+            -d chat_id="${TG_CHAT_ID}" \
+            -d parse_mode="HTML" \
+            -d disable_web_page_preview="true" \
+            -d text="${MESSAGE}"
